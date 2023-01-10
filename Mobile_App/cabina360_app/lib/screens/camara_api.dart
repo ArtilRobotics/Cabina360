@@ -19,24 +19,41 @@ class _CamaraAPIScreenState extends State<CamaraAPIScreen> {
   List<CameraDescription> _cameras = <CameraDescription>[];
   late CameraController _cameraController;
   bool isButtonActive = true;
-  int _counter = 10;
-  late Timer _timer;
+  bool inicio_grabacion = false;
+  bool _visibilidad = false;
 
-  void _startTimer() {
-    _counter = 10;
-    if (_timer != null) {
-      _timer.cancel();
+  static const maxSeconds = 3;
+  int seconds = maxSeconds;
+  Timer? timer;
+
+  void startTimer({bool reset = true}) {
+    if (reset) {
+      resetTimer();
     }
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        if (_counter > 0) {
-          _counter--;
-        } else {
-          _timer.cancel();
-        }
-      });
+
+    timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (seconds > 0) {
+        setState(() => seconds--);
+      } else {
+        stopTimer(reset: false);
+      }
+      if (seconds == 0) {
+        //stopTimer();
+        inicio_grabacion = true;
+        _visibilidad = false;
+      }
     });
   }
+
+  void stopTimer({bool reset = true}) {
+    if (reset) {
+      resetTimer();
+    }
+    setState(() => timer?.cancel());
+    //timer?.cancel();
+  }
+
+  void resetTimer() => setState(() => seconds = maxSeconds);
 
   @override
   void initState() {
@@ -67,58 +84,89 @@ class _CamaraAPIScreenState extends State<CamaraAPIScreen> {
   }
 
   Widget _buildScaffold(BuildContext context, Widget body) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Camara Flutter"),
-        centerTitle: true,
-        backgroundColor: Colors.amber,
-        elevation: 0,
-      ),
-      body: body,
-      floatingActionButton: FloatingActionButton(
-          onPressed: () async {
-            //XFile xfile = await _cameraController.takePicture();
-            //obtener la ruta de la imagen donde se guardo la foto y retornar a la escena anterior
-            // ignore: use_build_context_synchronously
-            //Navigator.pop(context, xfile.path);
+    //final isRunning = timer == null ? false : timer!.isActive;
+    //final isCompleted = seconds == maxSeconds || seconds == 0;
 
-            widgetContador();
-            _startTimer();
+    return Stack(
+      children: [
+        Align(
+          alignment: Alignment.center,
+          child: body,
+        ),
+        //body,
+        Visibility(
+          visible: _visibilidad,
+          child: Align(
+            alignment: Alignment.center,
+            child: Text(
+              '$seconds',
+              style: const TextStyle(
+                decoration: TextDecoration.none,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                fontSize: 80,
+              ),
+            ),
+          ),
+        ),
+        Visibility(
+          visible: _visibilidad,
+          child: Align(
+              child: SizedBox(
+            width: 200,
+            height: 200,
+            child: CircularProgressIndicator(
+              value: 1 - seconds / maxSeconds,
+              valueColor: const AlwaysStoppedAnimation(Colors.white),
+              strokeWidth: 12,
+              backgroundColor: Colors.greenAccent,
+            ),
+          )),
+        ),
 
-            //Timer(const Duration(seconds: 3), startRecording);
-            print("Inicio grabacion");
-          },
-          child: const Icon(Icons.camera)),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+        // Positioned(
+        //   top: 0.0,
+        //   left: 0.0,
+        //   right: 0.0,
+        //   child: AppBar(
+        //     title: const Text('Camara'),
+        //     backgroundColor: Colors.green,
+        //   ),
+        // ),
+        Align(
+            alignment: const Alignment(0, 0.9), //x,y
+            heightFactor: double.infinity,
+            child: ElevatedButton(
+              onPressed: seconds == maxSeconds
+                  ? () async {
+                      _visibilidad = true;
+                      inicioTimerGrabacion();
+                    }
+                  : null,
+              style: ElevatedButton.styleFrom(
+                  shape: const CircleBorder(),
+                  padding: const EdgeInsets.all(20),
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.pink[20],
+                  disabledBackgroundColor: Colors.grey,
+                  disabledForegroundColor: Colors.grey),
+              child: const Icon(
+                Icons.circle,
+                color: Colors.red,
+                size: 45,
+              ),
+            )),
+      ],
     );
   }
 
-  Scaffold widgetContador() {
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            (_counter > 0)
-                ? const Text("")
-                : const Text(
-                    "DONE!",
-                    style: TextStyle(
-                        color: Colors.green,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 48),
-                  ),
-            Text(
-              '$_counter',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 48,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+  void inicioTimerGrabacion() async {
+    startTimer();
+    Timer(const Duration(seconds: 3), startRecording);
+  }
+
+  void imprimir() {
+    print('Inicio Grabacion');
   }
 
   Future initializeCamera() async {
@@ -128,8 +176,9 @@ class _CamaraAPIScreenState extends State<CamaraAPIScreen> {
     _cameras =
         await availableCameras(); //no pasa a la siguiente linea hasta que se ejecute
 
-    _cameraController =
-        CameraController(_cameras[0], ResolutionPreset.high, enableAudio: true);
+    _cameraController = CameraController(
+        _cameras[0], ResolutionPreset.ultraHigh,
+        enableAudio: true);
 
     await _cameraController.initialize();
 
@@ -147,17 +196,14 @@ class _CamaraAPIScreenState extends State<CamaraAPIScreen> {
     await _cameraController.startVideoRecording();
 
     Timer(const Duration(seconds: 10), stopVideoRecording);
-    print("Fin de la grabacion");
-    setState(
-      () => isButtonActive = true,
-    );
   }
 
   void stopVideoRecording() async {
     final file = await _cameraController.stopVideoRecording();
-    print(file.path);
     await GallerySaver.saveVideo(file.path);
     File(file.path).deleteSync();
+    print('Fin de la Grabacion');
+    resetTimer();
     //print(file.path);
     //String path = join((await getApplicationDocumentsDirectory()).path,
     //    '${DateTime.now()}.mp4');
