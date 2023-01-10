@@ -10,12 +10,9 @@ class HomeScreen1Screen extends StatefulWidget {
 }
 
 class _HomeScreen1ScreenState extends State<HomeScreen1Screen> {
-  int _paguinaActual = 2;
+  int _paguinaActual = 0;
 
   final List<Widget> _paguinas = [
-    const ConfiguracionCamaraScreen(),
-    const GaleriaScreen(),
-    const CamaraScreen(),
     const RCScreen(),
     const ConfiguracionRCScreen(),
   ];
@@ -47,12 +44,6 @@ class _HomeScreen1ScreenState extends State<HomeScreen1Screen> {
               icon: Icon(menuOptions[0].icon), label: menuOptions[0].name),
           BottomNavigationBarItem(
               icon: Icon(menuOptions[1].icon), label: menuOptions[1].name),
-          BottomNavigationBarItem(
-              icon: Icon(menuOptions[2].icon), label: menuOptions[2].name),
-          BottomNavigationBarItem(
-              icon: Icon(menuOptions[3].icon), label: menuOptions[3].name),
-          BottomNavigationBarItem(
-              icon: Icon(menuOptions[4].icon), label: menuOptions[4].name),
         ]);
   }
 }

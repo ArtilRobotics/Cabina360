@@ -14,21 +14,6 @@ class AppRoutes {
     //     screen: const HomeScreen(),
     //     icon: Icons.access_alarm_outlined),
     MenuOption(
-        route: 'configcamara',
-        name: 'Setting_Camara',
-        screen: const ConfiguracionCamaraScreen(),
-        icon: Icons.settings_input_component_rounded),
-    MenuOption(
-        route: 'galeria',
-        name: 'Galeria',
-        screen: const GaleriaScreen(),
-        icon: Icons.photo_library_rounded),
-    MenuOption(
-        route: 'camara',
-        name: 'Camara',
-        screen: const CamaraScreen(),
-        icon: Icons.camera_alt_rounded),
-    MenuOption(
         route: 'rccontrol',
         name: 'RC',
         screen: const RCScreen(),
@@ -39,11 +24,6 @@ class AppRoutes {
         name: 'Setting_RC',
         screen: const ConfiguracionRCScreen(),
         icon: Icons.settings_sharp),
-    MenuOption(
-        route: 'camaraapi',
-        name: 'Camara_API',
-        screen: const CamaraAPIScreen(),
-        icon: Icons.camera_rear),
   ];
 
   static Map<String, Widget Function(BuildContext)> getAppRoutes() {
@@ -73,7 +53,7 @@ class AppRoutes {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     return MaterialPageRoute(
       //builder: (context) => const AlertScreen(),
-      builder: (context) => const GaleriaScreen(),
+      builder: (context) => const RCScreen(),
     );
   }
 }
