@@ -1,11 +1,9 @@
 {
   "board": {
-    "active_layer": 31,
-    "active_layer_preset": "",
+    "active_layer": 0,
+    "active_layer_preset": "All Layers",
     "auto_track_width": false,
-    "hidden_nets": [
-      "/PWM_IN1A"
-    ],
+    "hidden_nets": [],
     "high_contrast_mode": 0,
     "net_color_mode": 1,
     "opacity": {
@@ -64,11 +62,11 @@
       35,
       36
     ],
-    "visible_layers": "000f020_ffffffff",
+    "visible_layers": "fffffff_ffffffff",
     "zone_display_mode": 0
   },
   "meta": {
-    "filename": "KaraKuriSMD.kicad_prl",
+    "filename": "Cabina360.kicad_prl",
     "version": 3
   },
   "project": {
